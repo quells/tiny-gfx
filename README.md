@@ -14,4 +14,5 @@ $ tinyprog -p build/top.bin
 ## Acknowledgements
 
 PLL generation and basic VGA setup: https://github.com/juanmard/screen-pong
+
 nMigen reference: https://github.com/RobertBaruch/nmigen-tutorial
