@@ -7,7 +7,7 @@ A simple "graphics card" with VGA output built on the TinyFPGA platform.
 Requires nMigen and its icestorm40 dependencies.
 
 ```
-$ python3 gfx.py
+$ python3 src/gfx.py
 $ tinyprog -p build/top.bin
 ```
 
