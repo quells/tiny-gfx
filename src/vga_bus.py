@@ -12,9 +12,9 @@ class VGALayout(Layout):
             ("visible", 1),
             ("x", bitcount(w)),
             ("y", bitcount(h)),
-            ("r", 3),
-            ("g", 3),
-            ("b", 2),
+            ("r", 1),
+            ("g", 1),
+            ("b", 1),
         ])
 
 class VGABus(Record):
@@ -24,11 +24,15 @@ class VGABus(Record):
         self.timing = timing
 
     def forward(self, m: Module, src):
-        m.d.comb += self.hsync.eq(src.hsync)
-        m.d.comb += self.vsync.eq(src.vsync)
-        m.d.comb += self.visible.eq(src.visible)
-        m.d.comb += self.x.eq(src.x)
-        m.d.comb += self.y.eq(src.y)
-        m.d.comb += self.r.eq(src.r)
-        m.d.comb += self.g.eq(src.g)
-        m.d.comb += self.b.eq(src.b)
+        m.d.comb += [
+            self.hsync.eq(src.hsync),
+            self.vsync.eq(src.vsync),
+            self.visible.eq(src.visible),
+        ]
+        m.d.px += [
+            self.x.eq(src.x),
+            self.y.eq(src.y),
+            self.r.eq(src.r),
+            self.g.eq(src.g),
+            self.b.eq(src.b),
+        ]
