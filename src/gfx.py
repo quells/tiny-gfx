@@ -7,6 +7,8 @@ from vga import VGA
 from vga_timing import *
 
 from checkerboard import Checkerboard
+from charmap import CharMap
+from charviewer import CharViewer
 
 class Gfx(Elaboratable):
     def __init__(self, timings: VGATiming):
@@ -39,16 +41,24 @@ class Gfx(Elaboratable):
         vga = VGA(self.timings)
         m.submodules += vga
 
-        cb = Checkerboard(vga.bus)
-        m.submodules += cb
+        charmap = CharMap("data/elkgrove.json")
+        m.submodules += charmap
+        charviewer = CharViewer(vga.bus, charmap)
+        m.submodules += charviewer
 
         # Hook up external pins
 
         # VGA
-        vga_out = cb.vga
-        m.d.comb += platform.request("pin_13").o.eq(vga_out.hsync)
-        m.d.comb += platform.request("pin_12").o.eq(vga_out.vsync)
-        m.d.comb += platform.request("pin_11").o.eq(vga_out.visible)
+        vga_out = charviewer.vga
+        m.d.comb += [
+            platform.request("pin_13").o.eq(vga_out.hsync),
+            platform.request("pin_12").o.eq(vga_out.vsync),
+        ]
+        m.d.px += [
+            platform.request("pin_11").o.eq(vga_out.visible & vga_out.b),
+            platform.request("pin_10").o.eq(vga_out.visible & vga_out.g),
+            platform.request("pin_09").o.eq(vga_out.visible & vga_out.r),
+        ]
 
         # LED
         m.d.comb += platform.request("pin_14").o.eq(self.counter[16])
