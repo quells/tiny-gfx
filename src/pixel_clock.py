@@ -30,7 +30,7 @@ def _calc_freq_coefficients(fin: int, freq: float):
     return best
 
 class PixelClock(Elaboratable):
-    def __init__(self, freq_out: float, freq_in: int = 16, domain_name: str = "px"):
+    def __init__(self, freq_out: float, freq_in: int = 16):
         coeff = _calc_freq_coefficients(freq_in, freq_out)
         if not coeff:
             raise Exception("could not calculate PLL coefficients")
@@ -39,8 +39,7 @@ class PixelClock(Elaboratable):
         self.divq = coeff[2]
         
         self.clk_pin = Signal()
-        self.domain_name = domain_name
-        self.domain = ClockDomain(domain_name)
+        self.domain = ClockDomain("px")
         self.ports = [
             self.clk_pin,
             self.domain.clk,
@@ -62,11 +61,11 @@ class PixelClock(Elaboratable):
             i_RESETB=Const(1),
             i_BYPASS=Const(0),
 
-            o_PLLOUTCORE=ClockSignal(self.domain_name),
+            o_PLLOUTCORE=ClockSignal("px"),
             o_LOCK=pll_lock,
         )
 
-        rs = ResetSynchronizer(~pll_lock, domain=self.domain_name)
+        rs = ResetSynchronizer(~pll_lock, domain="px")
 
         m = Module()
         m.submodules += [pll, rs]

@@ -24,16 +24,14 @@ class VGATiming(object):
         self.hsp = hsp
         self.hbp = hbp
         self.h_px = vx + hfp + hsp + hbp
-        self.hsync_start = vx + hfp
-        self.hsync_end = self.hsync_start + hsp
+        self.hsync = (vx + hfp, vx + hfp + hsp)
 
         self.vy = vy
         self.vfp = vfp
         self.vsp = vsp
         self.vbp = vbp
         self.v_lines = vy + vfp + vsp + vbp
-        self.vsync_start = vy + vfp
-        self.vsync_end = self.vsync_start + vsp
+        self.vsync = (vy + vfp, vy + vfp + vsp)
 
 VGA_640_480_60 = VGATiming(
     # Technically 25.175 MHz but that's unattainable and most monitors will accept this.
