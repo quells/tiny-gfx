@@ -55,8 +55,8 @@ class TextMode(Elaboratable):
                 with m.Case(0):
                     m.d.px += [
                         # 1 Load addr into textbuf
-                        self.textbuf.i.eq((self.src.hblank >> 1) % self.textbuf.w),
-                        self.textbuf.j.eq(self.src.nexty[0:3]),
+                        self.textbuf.i.eq((self.src.hblank // 6) % self.textbuf.w),
+                        self.textbuf.j.eq(self.src.nexty >> 3),
                     ]
                 with m.Case(1):
                     m.d.px += [
@@ -77,7 +77,7 @@ class TextMode(Elaboratable):
                 with m.Case(4):
                     m.d.px += [
                         # 5 Load addr into linebuf
-                        self.linebuf.addr.eq((self.src.hblank >> 1) % self.textbuf.w),
+                        self.linebuf.addr.eq((self.src.hblank // 6) % self.textbuf.w),
                     ]
                 with m.Case(5):
                     m.d.px += [
