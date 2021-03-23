@@ -38,20 +38,31 @@ class VGA(Elaboratable):
             m.d.px += self.h.eq(0)
             # ... and increment vertical counter or reset it at end of frame.
             m.d.px += self.v.eq(
-                Mux(self.v < (t.v_lines-1),
-                self.v+1,
-                0)
+                Mux(
+                    self.v < (t.v_lines-1),
+                    self.v+1,
+                    0,
+                )
+            )
+            m.d.px += self.bus.nexty.eq(
+                Mux(
+                    self.v >= t.vy,
+                    0,
+                    self.v + 1,
+                )
             )
 
         # Sync pulses (active low)
         m.d.comb += self.bus.hsync.eq(~((t.hsync[0] < self.h) & (self.h < t.hsync[1])))
         m.d.comb += self.bus.vsync.eq(~((t.vsync[0] < self.v) & (self.v < t.vsync[1])))
 
-        # Visible region
-        m.d.comb += self.bus.visible.eq((self.h < t.vx) & (self.v < t.vy))
-
-        # Update pixel positions
-        m.d.px += self.bus.x.eq(Mux(self.bus.visible, self.h, 0))
-        m.d.px += self.bus.y.eq(Mux(self.bus.visible, self.v, 0))
+        m.d.px += [
+            # Visible region
+            self.bus.visible.eq((self.h < t.vx) & (self.v < t.vy)),
+            # Update pixel positions
+            self.bus.x.eq(Mux(self.bus.visible, self.h, 0)),
+            self.bus.y.eq(Mux(self.bus.visible, self.v, 0)),
+            self.bus.hblank.eq(Mux(~self.bus.visible, self.h-t.vx, 0)),
+        ]
 
         return m

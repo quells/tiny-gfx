@@ -23,7 +23,8 @@ class VGATiming(object):
         self.hfp = hfp
         self.hsp = hsp
         self.hbp = hbp
-        self.h_px = vx + hfp + hsp + hbp
+        self.hblank = hfp + hsp + hbp
+        self.h_px = vx + self.hblank
         self.hsync = (vx + hfp, vx + hfp + hsp)
 
         self.vy = vy

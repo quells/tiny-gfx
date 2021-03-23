@@ -5,13 +5,15 @@ from utils import bitcount
 from vga_timing import VGATiming
 
 class VGALayout(Layout):
-    def __init__(self, w: int, h: int):
+    def __init__(self, w: int, h: int, hblank: int):
         super().__init__([
             ("hsync", 1),
             ("vsync", 1),
             ("visible", 1),
             ("x", bitcount(w)),
             ("y", bitcount(h)),
+            ("hblank", bitcount(hblank)),
+            ("nexty", bitcount(h)),
             ("r", 1),
             ("g", 1),
             ("b", 1),
@@ -19,7 +21,7 @@ class VGALayout(Layout):
 
 class VGABus(Record):
     def __init__(self, timing: VGATiming):
-        layout = VGALayout(timing.vx, timing.vy)
+        layout = VGALayout(timing.vx, timing.vy, timing.hblank)
         super().__init__(layout)
         self.timing = timing
 
