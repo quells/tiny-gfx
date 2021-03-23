@@ -9,8 +9,10 @@ class TextBuffer(Elaboratable):
         width: width in characters
         height: height in characters
         """
-        self.w = w = bitcount(width)
-        self.h = h = bitcount(height)
+        self.w = width
+        w = bitcount(width)
+        self.h = height
+        h = bitcount(height)
         self.i = Signal(w)
         self.j = Signal(h)
 
@@ -18,7 +20,7 @@ class TextBuffer(Elaboratable):
         self.data_r = Signal(8)
         self.data_w = Signal(8)
         self.we = Signal()
-        self.text = Memory(width=8, depth=width*height, init=[ord(c) for c in "Loading..."])
+        self.text = Memory(width=8, depth=width*height, init=[c for c in range(256)])
 
     def elaborate(self, platform: Platform) -> Module:
         m = Module()

@@ -15,7 +15,7 @@ class LineBuffer(Elaboratable):
         self.data_r = Signal(8)
         self.data_w = Signal(8)
         self.we = Signal()
-        self.mem = Memory(width=8, depth=width, init=[0xAA, 0x55])
+        self.mem = Memory(width=8, depth=width)
 
     def elaborate(self, platform: Platform) -> Module:
         m = Module()
