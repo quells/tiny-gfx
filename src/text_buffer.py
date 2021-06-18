@@ -20,7 +20,7 @@ class TextBuffer(Elaboratable):
         self.data_r = Signal(8)
         self.data_w = Signal(8)
         self.we = Signal()
-        self.text = Memory(width=8, depth=width*height, init=[c for c in range(256)])
+        self.text = Memory(width=8, depth=width*height, init=[c % 256 for c in range(width*height)])
 
     def elaborate(self, platform: Platform) -> Module:
         m = Module()

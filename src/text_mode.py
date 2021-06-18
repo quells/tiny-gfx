@@ -23,26 +23,122 @@ class TextMode(Elaboratable):
         m.submodules += self.linebuf
 
         out = Signal()
-        m.d.comb += [
-            out.eq(self.linebuf.out),
-            self.linebuf.we.eq(~self.src.visible),
+        m.d.px += [
+            # Display VGA
+            self.vga.r.eq(out),
+            self.vga.g.eq(out),
+            self.vga.b.eq(out),
         ]
 
         char_idx = Signal(8)
         char_data = Signal(8)
-        with m.If(self.src.visible):
+
+        with m.Switch(self.src.x % 8):
+            with m.Case(0):
+                m.d.px += [
+                    # Load addr into textbuf
+                    self.textbuf.i.eq(self.src.x >> 3),
+                    self.textbuf.j.eq(self.src.nexty >> 3),
+                ]
+            with m.Case(1):
+                m.d.px += [
+                    # Read char code from textbuf
+                    char_idx.eq(self.textbuf.data_r),
+                ]
+            with m.Case(2):
+                m.d.px += [
+                    # Load addr into charmap
+                    self.charmap.char.eq(char_idx),
+                    self.charmap.line.eq(self.src.nexty[0:3]),
+                ]
+            with m.Case(3):
+                m.d.px += [
+                    # Read char row from charmap
+                    char_data.eq(self.charmap.data),
+                ]
+            with m.Case(4):
+                m.d.px += [
+                    # Load addr into linebuf
+                    self.linebuf.addr.eq(self.src.x >> 3),
+                ]
+            with m.Case(5):
+                m.d.px += [
+                    # Write char row to linebuf
+                    self.linebuf.we.eq(1),
+                    self.linebuf.data_w.eq(char_data),
+                ]
+            with m.Case(6):
+                m.d.px += [
+                    # Disable linebuf write
+                    self.linebuf.we.eq(0),
+                ]
+        m.d.px += [
+            out.eq(self.linebuf.out),
+
+            # Update line buffer readout
+            self.linebuf.mask.eq(1 << (self.src.x)[0:3]),
+            # self.linebuf.addr.eq(self.src.x[3:]),
+        ]
+
+        """
+        with m.If(self.src.nexty[0] == 0):
             m.d.px += [
+                out.eq(0),
+            ]
+            with m.Switch(self.src.x % 8):
+                with m.Case(0):
+                    m.d.px += [
+                        # Load addr into textbuf
+                        self.textbuf.i.eq(self.src.x >> 3),
+                        self.textbuf.j.eq(self.src.nexty >> 3),
+                    ]
+                with m.Case(1):
+                    m.d.px += [
+                        # Read char code from textbuf
+                        char_idx.eq(self.textbuf.data_r),
+                    ]
+                with m.Case(2):
+                    m.d.px += [
+                        # Load addr into charmap
+                        self.charmap.char.eq(char_idx),
+                        self.charmap.line.eq(self.src.nexty[0:3]),
+                    ]
+                with m.Case(3):
+                    m.d.px += [
+                        # Read char row from charmap
+                        char_data.eq(self.charmap.data),
+                    ]
+                with m.Case(4):
+                    m.d.px += [
+                        # Load addr into linebuf
+                        self.linebuf.addr.eq(self.src.x >> 3),
+                    ]
+                with m.Case(5):
+                    m.d.px += [
+                        # Write char row to linebuf
+                        self.linebuf.we.eq(1),
+                        self.linebuf.data_w.eq(char_data),
+                    ]
+                with m.Case(6):
+                    m.d.px += [
+                        # Disable linebuf write
+                        self.linebuf.we.eq(0),
+                    ]
+                with m.Case(7):
+                    m.d.px += []
+        with m.Else():
+            # Write line on odd pixels
+            m.d.px += [
+                out.eq(self.linebuf.out),
+
                 # Update line buffer readout
                 self.linebuf.mask.eq(1 << (self.src.x)[0:3]),
                 self.linebuf.addr.eq(self.src.x[3:]),
-
-                # Display VGA
-                self.vga.r.eq(out),
-                self.vga.g.eq(out),
-                self.vga.b.eq(out),
             ]
+        """
+
+        """
         with m.Else():
-            """
             FIXME
             Load addr into textbuf
             Read char code from textbuf
@@ -50,7 +146,6 @@ class TextMode(Elaboratable):
             Read char row from charmap
             Load addr into linebuf
             Write char row to linebuf
-            """
             with m.Switch(self.src.hblank % 6):
                 with m.Case(0):
                     m.d.px += [
@@ -84,5 +179,6 @@ class TextMode(Elaboratable):
                         # 6 Write char row to linebuf
                         self.linebuf.data_w.eq(char_data),
                     ]
+        """
 
         return m
