@@ -9,6 +9,7 @@ from vga_timing import *
 from checkerboard import Checkerboard
 from charmap import CharMap
 from charviewer import CharViewer
+from sprite_engine import SpriteEngine
 
 class Gfx(Elaboratable):
     def __init__(self, timings: VGATiming):
@@ -41,15 +42,13 @@ class Gfx(Elaboratable):
         vga = VGA(self.timings)
         m.submodules += vga
 
-        charmap = CharMap("data/elkgrove.json")
-        m.submodules += charmap
-        charviewer = CharViewer(vga.bus, charmap)
-        m.submodules += charviewer
+        sprite_engine_0 = SpriteEngine(vga.bus)
+        m.submodules += sprite_engine_0
 
         # Hook up external pins
 
         # VGA
-        vga_out = charviewer.vga
+        vga_out = sprite_engine_0.vga
         m.d.comb += [
             platform.request("pin_13").o.eq(vga_out.hsync),
             platform.request("pin_12").o.eq(vga_out.vsync),
