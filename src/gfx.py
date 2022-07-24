@@ -71,11 +71,11 @@ if __name__ == "__main__":
     print("Defining pins")
     platform.add_resources([
         # VGA
-        Resource("pin_09", 0, Pins("E1", dir="o")),
-        Resource("pin_10", 0, Pins("G2", dir="o")),
-        Resource("pin_11", 0, Pins("H1", dir="o")),
-        Resource("pin_12", 0, Pins("J1", dir="o")),
-        Resource("pin_13", 0, Pins("H2", dir="o")),
+        Resource("pin_09", 0, Pins("E1", dir="o")), # r
+        Resource("pin_10", 0, Pins("G2", dir="o")), # g
+        Resource("pin_11", 0, Pins("H1", dir="o")), # b
+        Resource("pin_12", 0, Pins("J1", dir="o")), # vsync
+        Resource("pin_13", 0, Pins("H2", dir="o")), # hsync
 
         # LED
         Resource("pin_14", 0, Pins("H9", dir="o")),

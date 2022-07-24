@@ -4,7 +4,7 @@ A simple "graphics card" with VGA output built on the TinyFPGA platform.
 
 ## Build and Flash
 
-Requires nMigen and its icestorm40 dependencies.
+Requires nMigen and its icestorm40 dependencies. A build environment is specified in the included Dockerfile.
 
 ```
 $ python3 src/gfx.py
