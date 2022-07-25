@@ -9,19 +9,11 @@ class SpriteEngine(Elaboratable):
         self.src = vga
         self.vga = VGABus(vga.timing)
 
-        self.x = Signal(bitcount(vga.timing.vx))
-        self.y = Signal(bitcount(vga.timing.vy))
+        self.x = Signal(bitcount(vga.timing.h_px))
+        self.y = Signal(bitcount(vga.timing.v_lines))
 
-        bitmap = [
-            0b00111100,
-            0b01100110,
-            0b11000011,
-            0b10000001,
-            0b10000001,
-            0b11000011,
-            0b01100110,
-            0b00111100,
-        ]
+        # bitmap = [0x55,0xaa,0x55,0xaa,0x55,0xaa,0x55,0xaa]
+        bitmap = [0x3c,0x7e,0xff,0xff,0xff,0xff,0x7e,0x3c]
         self.mem = Memory(width=8, depth=8, init=bitmap)
         self.char = Signal(8)
         self.mask = Signal(8)
@@ -34,20 +26,19 @@ class SpriteEngine(Elaboratable):
         m.d.comb += [
             rdport.addr.eq(addr),
             self.char.eq(rdport.data),
-            self.x.eq(10),
-            self.y.eq(10),
         ]
 
         self.vga.forward(m, self.src)
 
-        inside_sprite = (self.x <= self.vga.x) & (self.vga.x < (self.x + 8)) & \
-                        (self.y <= self.vga.y) & (self.vga.y < (self.y + 8))
+        vx = self.vga._x - 1
+        inside_sprite_x = (self.x <= vx) & (vx <= (self.x + 8))
+        inside_sprite_y = (self.y <= self.vga._y) & (self.vga._y < (self.y + 8))
 
-        with m.If(inside_sprite):
-            m.d.px += [
-                self.mask.eq(1 << (self.vga.x - self.x)),
-                addr.eq(self.vga.y - self.y),
-            ]
+        with m.If(inside_sprite_y):
+            m.d.px += addr.eq(self.vga.y - self.y)
+
+        with m.If(inside_sprite_x & inside_sprite_y):
+            m.d.px += self.mask.eq(1 << (vx - self.x))
         with m.Else():
             m.d.px += self.mask.eq(0)
 
@@ -56,11 +47,12 @@ class SpriteEngine(Elaboratable):
             out.eq((self.mask & self.char) != 0),
         ]
 
-        m.d.px += [
-            self.vga.r.eq(out),
-            self.vga.g.eq(out),
-            self.vga.b.eq(out),
-        ]
+        with m.If(inside_sprite_x & inside_sprite_y):
+            m.d.px += [
+                self.vga.r.eq(out),
+                self.vga.g.eq(out),
+                self.vga.b.eq(out),
+            ]
 
         return m
 
